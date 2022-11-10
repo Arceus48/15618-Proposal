@@ -10,6 +10,8 @@ For this project, we plan to implement the conjugate gradient image integration 
 ## Background:
 Gradient Image Fusion is a general and useful task we use in image editing. Though conjugate gradient descent proves to be a good solver to the problem, the algorithm can take a great number of iterations to converge and hence is very slow if executed sequentially. The algorithm is as the pseudo-code below:
 
+![Pseudo Code](imgs/algorithm.png)
+
 We find that most of the algorithms are per-pixel operations or Laplacian convolution. So the computation-intensive algorithm can be well parallelized if divided by pixel data. Specifically, all per-pixel arithmetics and convolutions can be well parallelized except for the serialized part of dot product and start/end of each iteration. Therefore, it is worth exploring the performance of various parallel frameworks on various architectures including GPU and multi-core CPU.
 
 ## Challenge:
