@@ -52,6 +52,7 @@ Performance data: We plan to present the speedup graphs of the parallel implemen
 Image processing includes many similar small subtasks on pixels. The nature of the problem makes the GPU a good platform to perform parallel processing. We also want to compare the performance of the GPU with the multi-core CPU to gain a deeper understanding on how to choose between GPU and CPU for parallelizing an image processing task. 
 
 ## Schedule:
+
 | Week          | Task                                                                                                                                      |
 |---------------|-------------------------------------------------------------------------------------------------------------------------------------------|
 | 11.14 - 11.20 | Study about the papers and understand the algorithm.  Work on the implementations on the serial version.                                  |
