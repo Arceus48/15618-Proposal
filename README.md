@@ -57,4 +57,3 @@ Image processing includes many similar small subtasks on pixels. The nature of t
 | 11.28 - 12.4  | Work on ISPC/OpenMP implementations. Continue gathering images.                                                                           |
 | 12.5 - 12.11  | Perform experiments on the parallel implementations.  Analyze the performance data. If there is extra time, work on a MPI implementation. |
 | 12.11 - 12.18 | Work on the final report. Work on the project poster.                                                                                     |
-|---------------|-------------------------------------------------------------------------------------------------------------------------------------------|
