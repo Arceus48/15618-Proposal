@@ -4,59 +4,61 @@ Teammates: Lichen Jin, Jiuzhi Yu
 
 URL: https://arceus48.github.io/15618-Proposal/
 
-## Summary: 
-For this project, we plan to implement the conjugate gradient image integration algorithm for  Image Gradient Fusion on GPU and multi-core CPU platforms. We plan to perform system benchmarks and observe the performance and efficiency of various parallel programming systems (OpenMP, ISPC, CUDA) on homogeneous and heterogeneous architectures.
+## Current progress
+We first learned about the algorithm through the slides from 15-663 [6]. We further studied the algorithm for image fusion from the paper [1] and conjugate gradient descent from the paper [3]. After that, we implemented the image fusion algorithm in C++ with OpenCV for image reading and writing. We also optimized the sequential program to minimize the overhead.
 
-## Background:
-Gradient Image Fusion is a general and useful task we use in image editing. Though conjugate gradient descent proves to be a good solver to the problem, the algorithm can take a great number of iterations to converge and hence is very slow if executed sequentially. The algorithm is as the pseudo-code below:
+With a working sequential baseline, we implemented the OpenMP version running on a multi-core CPU environment. We are still working on optimizing the OpenMP version to achieve a better speedup.
 
-![Pseudo Code](imgs/algorithm.png)
+For experiment data (images), we now collected the images used in the paper [3] to validate our implementations and get preliminary speedup for OpenMP. We plan to collect more images with our camera for experiments.
 
-We find that most of the algorithms are per-pixel operations or Laplacian convolution. So the computation-intensive algorithm can be well parallelized if divided by pixel data. Specifically, all per-pixel arithmetics and convolutions can be well parallelized except for the serialized part of dot product and start/end of each iteration. Therefore, it is worth exploring the performance of various parallel frameworks on various architectures including GPU and multi-core CPU.
+The GPU implementation is different compared to the default sequential logic, and we are developing in progress along the sub tasks we have broken down in the schedule.
 
-## Challenge:
-The whole image will be broken down into 2D blocks; most operations like arithmetics and convolutions have good data locality; however, data communication and explicit synchronizations may happen at the edge of convolutions and the reduction sum of dot products. To tackle that challenge we look into the literature and follow the suggestions to make non-trivial operations faster in the parallel systems.
+## Goals
+Here are the goals we are doing at the current stage.
+1. As we have planned in the proposal, we plan to implement a parallel gradient domain for a GPU version (CUDA) and a multi-core CPU version (OpenMP). After that we are performing a serious performance analysis on our photograph data sets. We are pursuing this goal with the completed OpenMP implementation and some preliminary results.
+2. Given that we have got some preliminary results on OpenMP, we have diagnosed the not-so-good speedup and will optimize it for less synchronizations. That is naturally an extra goal we plan to achieve because speedup is critical for the functionality of this application.
+3. With regard to the goal we hope to achieve, we haven’t made progress yet, due to the development difficulty of the MPI-like programming framework.
 
-Specifically, there are two non-trivial specific operators that need acceleration: Laplacian Convolution & Dot Product. We plan on following the suggestion in the paper Sparse matrix solvers on the GPU: conjugate gradients and multigrid.
+## Deliverables at poster session
+We plan to have two forms of deliverables for the poster session:
+1. We are having a demo with regard to what image fusion task does and how it can be done very fast with parallel implementations.
+2. As we are having thorough performance analysis treating it as a parallel problem, we are going to have the result charts and tables on our poster.
 
-## Resources:
+## Preliminary results
+The current results are:
+1. Correctly implement the image fusion algorithm to generate an image with useful features from both the ambient image and the flash image. We provide an example at the end of this report.
+2. Implemented the OpenMP version and calculated the speedup for 2, 4, 8, and 16 threads on a local machine with an Intel Core i7-10875H (8 cores, 16 threads). The code was built and run in Windows Subsystem for Linux (WSL). The speedup graph is attached below. The speedup here may also be influenced by our platform (WSL) and also other running processes in the operating system. We plan to move our tests to the GHC machine later to get a more accurate speedup.
 
-Codebase: 
-We plan to start from scratch without using any publicly available code base.
+![OpenMP Speedup](imgs/Speedup.png)
 
-Dataset: 
-We plan to use the demo datasets for a few different gradient fusion tasks, such as the poisson image pairs provided in the Poisson image editing paper [1].
-
-Computing Resource: 
-We will use the GHC machines for GPU and the PSC machines for a multi-core CPU environment.
-
-Papers:
-1. Georg Petschnigg, Richard Szeliski, Maneesh Agrawala, Michael Cohen, Hugues Hoppe, and Kentaro Toyama. 2004. Digital photography with flash and no-flash image pairs. ACM Trans. Graph. 23, 3 (August 2004), 664–672. https://doi.org/10.1145/1015706.1015777
-2. Jeff Bolz, Ian Farmer, Eitan Grinspun, and Peter Schröder. 2003. Sparse matrix solvers on the GPU: conjugate gradients and multigrid. ACM Trans. Graph. 22, 3 (July 2003), 917–924. https://doi.org/10.1145/882262.882364
-3. James McCann and Nancy S. Pollard. 2008. Real-time gradient-domain painting. ACM Trans. Graph. 27, 3 (August 2008), 1–7. https://doi.org/10.1145/1360612.1360692
-4. Patrick Pérez, Michel Gangnet, and Andrew Blake. 2003. Poisson image editing. In ACM SIGGRAPH 2003 Papers (SIGGRAPH '03). Association for Computing Machinery, New York, NY, USA, 313–318. https://doi.org/10.1145/1201775.882269
-5. Computational Photography (CMU 15-663). 2022. http://graphics.cs.cmu.edu/courses/15-463/.
+## Issues and concerns
+As we have stated in the goals section, the synchronization between workers can be a critical factor of how the speedup is. That is especially an issue in CUDA implementation of dot products. Although the paper introduces a recursive scan algorithm for better locality, we will try both that algorithm and a naive all reduction to see which one actually works better in CUDA, for very large photos.
 
 
-## Goals and deliverables:
+## References
+1. Amit Agrawal, Ramesh Raskar, Shree K. Nayar, and Yuanzhen Li. 2005. Removing photography artifacts using gradient projection and flash-exposure sampling. ACM Trans. Graph. 24, 3 (July 2005), 828–835. https://doi.org/10.1145/1073204.1073269
+2. Georg Petschnigg, Richard Szeliski, Maneesh Agrawala, Michael Cohen, Hugues Hoppe, and Kentaro Toyama. 2004. Digital photography with flash and no-flash image pairs. ACM Trans. Graph. 23, 3 (August 2004), 664–672. https://doi.org/10.1145/1015706.1015777
+3. Jeff Bolz, Ian Farmer, Eitan Grinspun, and Peter Schröder. 2003. Sparse matrix solvers on the GPU: conjugate gradients and multigrid. ACM Trans. Graph. 22, 3 (July 2003), 917–924. https://doi.org/10.1145/882262.882364
+4. James McCann and Nancy S. Pollard. 2008. Real-time gradient-domain painting. ACM Trans. Graph. 27, 3 (August 2008), 1–7. https://doi.org/10.1145/1360612.1360692
+5. Patrick Pérez, Michel Gangnet, and Andrew Blake. 2003. Poisson image editing. In ACM SIGGRAPH 2003 Papers (SIGGRAPH '03). Association for Computing Machinery, New York, NY, USA, 313–318. https://doi.org/10.1145/1201775.882269
+6. Computational Photography (CMU 15-663). 2022. http://graphics.cs.cmu.edu/courses/15-463/.
 
-Goals we plan to achieve: Successfully build the algorithm for a GPU version and a multi-core CPU version (ISPC or OpenMP). After we finish the implementations, we will perform data analysis to reason about the performance differences on the two different platforms. For performance expectations, we hope to get a near-linear speedup.
+## Schedule
 
-Goals we hope to achieve: Besides the goals above, we hope to build a message passing version of the algorithm. Then we hope to analyze the performance differences between the three different parallel implementations and investigate the more suitable platform for parallelizing our problem.
+| Week          | Task                                                                                                                                                                                                              |
+|---------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| 11.14 - 11.20 | 1. Study about the papers and understand the algorithm.  2. Work on the implementations on the serial version.                                                                                                          |
+| 11.21 - 11.27 | 1. Optimize the serial version Start gathering images with different characteristics.                                                                                                                                |
+| 11.28 - 12.1  | 1. Work on OpenMP implementations. 2. Get initial speedup of OpenMP implementations.                                                                                                                                    |
+| 12.1 - 12.4   | 1. Work on the CUDA implementations (Lichen). 2. Optimize the OpenMP implementation (Jiuzhi). 3. Collect more images for experimentations (Lichen).                                                                        |
+| 12.5 - 12.8   | 1. Optimize the CUDA implementation to achieve a better speedup (Lichen). 2. Move the code into the GHC machine for a more accurate experiment (Jiuzhi).                                                                |
+| 12.8 - 12.11  | 1. Perform experiments on the three implementations on the GHC machine (Both). 2. Analyze the running time by calculating speedup. 3. Break down the time for each implementation to get more performance insights (Both). |
+| 12.11 - 12.18 | 1. Work on the final report (Both). 2. Work on the project poster (Both).                                                                                                                                               |
 
-Demo at the poster session: 
-Image demo: We plan to show some images processed with the gradient image fusion algorithm and also showing how to run it through the command line in real-time.
-Performance data: We plan to present the speedup graphs of the parallel implementations we make, and also provide time breakdown for the two or three versions of the implementations, including the serial portion and the parallel portion.
-
-## Platform choice:
-Image processing includes many similar small subtasks on pixels. The nature of the problem makes the GPU a good platform to perform parallel processing. We also want to compare the performance of the GPU with the multi-core CPU to gain a deeper understanding on how to choose between GPU and CPU for parallelizing an image processing task. 
-
-## Schedule:
-
-| Week          | Task                                                                                                                                      |
-|---------------|-------------------------------------------------------------------------------------------------------------------------------------------|
-| 11.14 - 11.20 | Study about the papers and understand the algorithm.  Work on the implementations on the serial version.                                  |
-| 11.21 - 11.27 | Work on CUDA implementations. Start gathering images with different characteristics.                                                      |
-| 11.28 - 12.4  | Work on ISPC/OpenMP implementations. Continue gathering images.                                                                           |
-| 12.5 - 12.11  | Perform experiments on the parallel implementations.  Analyze the performance data. If there is extra time, work on a MPI implementation. |
-| 12.11 - 12.18 | Work on the final report. Work on the project poster.                                                                                     |
+## Appendix
+Example ambient image
+![Example ambient image](imgs/museum_ambient.png)
+Example flash image
+![Example flash image](imgs/museum_flash.png)
+Example result image
+![Example result image](imgs/test.png)
